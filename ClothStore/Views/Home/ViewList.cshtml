@@ -1,0 +1,167 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2>LIST OF PRODUCT</h2>
+<button type="submit" style="margin: 5px; background-color: #5233b7; color: white;" class="Insertbtn"> THEM SAN PHAM </button>
+
+<div class="modal" tabindex="-1" role="dialog" id="EditInsertmodal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">EDIT OR INSERT INFORMATION OF PRODUCT</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="margin-left: 165px;">
+                <form>
+                    <label>Ten san pham</label>
+                    <input class="form-control" id="productname" placeholder="Nhap ten hang quan ao" value="">
+
+                    <label>Size</label>
+                    <input class="form-control" id="productsize" placeholder="Nhap size" >
+
+                    <label>Loai quan ao</label>
+                    <input class="form-control" id="producttype"  placeholder="Nhap loai quan ao" >
+
+                    <label>Gia thanh</label>
+                    <input class="form-control" id="productprice" placeholder="Nhap gia thanh">
+
+                    <input class="form-control" id="productid" type="hidden"/>
+
+                </form>
+             </div>
+
+           
+        </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="InsertEditbtn">FINISH</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+
+<div class="modal" tabindex="-1" role="dialog" id="Deletemodal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">DISPOSING PRODUCT</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>ARE YOU SURE WANT TO DELETE THIS PRODUCT?</p>
+                <input class="form-control" id="Deleteid" type="hidden" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="Confirm">YES</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div id="ClothList" class="text-center" style="display:flex; flex-wrap: wrap;"></div>
+
+<script>
+    $(document).ready(function () {
+        $(".Insertbtn").click(function () {
+            console.log(1);
+            $("#EditInsertmodal").modal('show');
+            $("#productname").val("");
+            $("#productsize").val("");
+            $("#producttype").val("");
+            $("#productprice").val(0);
+            $("#productid").val(0);
+           
+            
+        });
+
+        
+
+        $.ajax({
+            url: "/Home/DisplayList",
+            type: "GET",
+            data: { },
+            success: function (ListfromUrl) {
+                console.log(ListfromUrl);
+                $(ListfromUrl).each(function () {
+                    var htmlcsslist = '<div class="col-lg-4" style ="background-color:rgb(177, 29, 193); margin: 15px; color: white; width: 300px; display:inline-block;">';
+                    htmlcsslist += "<div class='NameofProduct'> Ten quan ao: " + this.ProductName + "</div>";
+                    htmlcsslist += "<div class='SizeofProduct'> Size: " + this.ProductSize + "</div>";
+                    htmlcsslist += "<div class='TypeofProduct'> Loai: " + this.ProductType + "</div>";
+                    htmlcsslist += "<div class='PriceofProduct'> Gia: " + this.ProductPrice + "</div>";
+                   
+
+                    htmlcsslist += "<button type='submit' class='Updatebtn' id='" + this.ProductId + "' style='margin: 5px; background-color: #5233b7; color: white; '> Sua </button>";
+
+                    htmlcsslist += "<button type='submit' class='Deletebtn' id='" + this.ProductId + "' style='margin: 5px; background-color: #5233b7; color: white; '> Xoa </button>";
+                    htmlcsslist += "</div>";
+                    $('#ClothList').append(htmlcsslist);
+                    
+                });
+
+                $(".Updatebtn").click(function (event) {
+                    console.log(event.target.id); $("#EditInsertmodal").modal('show');
+                    $.ajax({
+                        url: "/Home/GetIdProduct/",
+                        type: "GET",
+                        data: { id: event.target.id },
+                        success: function (product) {
+                            console.log(product);
+                            $("#productname").val(product.ProductName);
+                            $("#productsize").val(product.ProductSize);
+                            $("#producttype").val(product.ProductType);
+                            $("#productprice").val(product.ProductPrice);
+                            $("#productid").val(product.ProductId);
+                        },
+
+                    });
+                });
+                $(".Deletebtn").click(function (event) {
+                    console.log(event.target.id); $("#Deletemodal").modal('show');
+                    $("#Deleteid").val(event.target.id);
+
+                });
+            }
+            
+        });
+
+        $("#InsertEditbtn").click(function () {
+            $.ajax({
+                url: "/Home/CreateProduct/",
+                type: "POST",
+                data: { id: $("#productid").val(), ProductName: $("#productname").val(), ProductPrice: $("#productprice").val(), ProductSize: $("#productsize").val(), ProductType: $("#producttype").val()},
+               
+            });
+            console.log(1);
+            
+        });
+
+        $("#Confirm").click(function (event) {
+            $.ajax({
+                url: "/Home/DeleteProduct/",
+                type: "POST",
+                data: { id: $("#Deleteid").val() },
+                success: function (dataproduct) { location.reload(); },
+            });
+        }
+
+        );
+
+        
+
+       
+
+        
+    });
+</script>
+
